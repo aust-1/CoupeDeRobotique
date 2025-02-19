@@ -50,10 +50,12 @@ Com *com;
 Point target_position(START_X, START_Y, START_THETA);
 float target_linear_speed  = 0.0f;
 float target_angular_speed = 0.0f;
+bool control_position = true;
 
 // b. define the callback functions
 void set_speed_and_position(byte *msg, byte size)
 {
+  control_position = true;
   msg_set_speed_and_position *target_speed_and_position = (msg_set_speed_and_position *)msg;
 
   // Update speeds
@@ -65,19 +67,32 @@ void set_speed_and_position(byte *msg, byte size)
   target_position.y = target_speed_and_position->target_position_y;
   target_position.theta = target_speed_and_position->target_position_theta;
 }
+void set_speed(byte *msg, byte size)
+{
+  control_position = false;
+  msg_set_speed *target_speed = (msg_set_speed *)msg;
+
+  // Update speeds
+  target_linear_speed = target_speed->target_linear_speed;
+  target_angular_speed = target_speed->target_angular_speed;
+}
 
 // c. assign the callback functions to the right message id
 void (*callback_functions[256])(byte *msg, byte size);
 
 void initialize_callback_functions() {
   callback_functions[SET_SPEED_AND_POSITION] = &set_speed_and_position;
+  callback_functions[SET_SPEED] = &set_speed;
 }
 
 // 4. Define the timer interrupt handle function (this function will be called every 10ms, and which manage the robot position and speed: asservissement)
 void handle()
 {
   rolling_basis_ptr->odometrie_handle();
-  rolling_basis_ptr->handle(target_position, target_linear_speed, target_angular_speed);
+  if (control_position)
+    rolling_basis_ptr->handle(target_position, target_linear_speed, target_angular_speed);
+  else
+    rolling_basis_ptr->handle(target_linear_speed, target_angular_speed);
 }
 
 

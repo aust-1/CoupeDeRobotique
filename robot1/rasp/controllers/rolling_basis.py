@@ -23,6 +23,7 @@ class Command(Enum):
     """
     # rasp -> teensy : 0-127 (Convention)
     SET_SPEED_AND_POSITION = 0
+    SET_SPEED = 1
 
     # two ways : 127 (Convention)
     NACK = 127
@@ -176,6 +177,29 @@ class RollingBasis(Teensy):
         # Send the composed message to the Teensy
         # https://docs.python.org/3/library/struct.html#format-characters
         self.send_bytes(msg)
+    
+    
+    @log(param_logger="RollingBasis")
+    def set_speed(
+            self,
+            target_linear_speed: float,
+            target_angular_speed: float,
+    ) -> None:
+        """
+        Sends a command to set the target speed of the rolling basis.
+
+        Args:
+            target_linear_speed (float): Target linear speed.
+            target_angular_speed (float): Target angular speed.
+        """
+        msg = (
+                Command.SET_SPEED.to_bytes()
+                + struct.pack("<f", target_linear_speed)
+                + struct.pack("<f", target_angular_speed)
+        )
+        # Send the composed message to the Teensy
+        # https://docs.python.org/3/library/struct.html#format-characters
+        self.send_bytes(msg)
 
 
 class RollingBasisDummy:
@@ -317,6 +341,32 @@ class RollingBasisDummy:
             f"[DUMMY] Setting speed to linear={target_linear_speed}, "
             f"angular={target_angular_speed}, "
             f"position=({target_position.x}, {target_position.y}, {target_position.theta})"
+        )
+    
+    
+    @log("RollingBasis")
+    def set_speed(
+            self,
+            target_linear_speed: float,
+            target_angular_speed: float,
+    ) -> None:
+        """
+        Dummy method to set the target speed of the rolling basis.
+
+        In the real implementation, this would send a message to the Teensy
+        containing the desired linear speed, angular speed.
+
+        Args:
+            target_linear_speed (float): Target linear speed.
+            target_angular_speed (float): Target angular speed.
+        """
+        # This is where you'd normally pack data and send it over serial
+        # or another communication interface. We just log it here.
+        self.linear_speed = target_linear_speed
+        self.angular_speed = target_angular_speed
+        self.logger.info(
+            f"[DUMMY] Setting speed to linear={target_linear_speed}, "
+            f"angular={target_angular_speed}, "
         )
 
     def send_bytes(self, msg: bytes):

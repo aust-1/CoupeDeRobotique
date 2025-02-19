@@ -9,6 +9,7 @@
 /* Definition of message IDs */
 // rasp -> teensy : 0-127 (Convention)
 #define SET_SPEED_AND_POSITION 0
+#define SET_SPEED 1
 
 // two ways : 127 (Convention)
 #define NACK 127
@@ -29,6 +30,12 @@ struct msg_set_speed_and_position
     float target_position_x;
     float target_position_y;
     float target_position_theta;
+};
+struct msg_set_speed
+{
+    byte command = SET_SPEED;
+    float target_linear_speed;
+    float target_angular_speed;
 };
 
 // teensy -> rasp : 128-255
