@@ -81,14 +81,3 @@ public:
     // Method
     void compute(Point current_point, Ticks current_ticks, Rolling_Basis_Params *rolling_basis_params) override;
 };
-
-class Stay_Put : public Basic_Action
-{
-public:
-    // Atribute
-    Ticks current_ticks_position;
-    // Constructor
-    Stay_Put(float target_theta, Direction *direction, byte *speed, Precision_Params *precision_params);
-    // Method
-    void compute(Point current_point, Ticks current_ticks, Rolling_Basis_Params *rolling_basis_params) override;
-};
